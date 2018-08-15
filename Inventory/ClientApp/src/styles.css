@@ -1,0 +1,34 @@
+/* You can add global styles to this file, and also import other style files */
+@import "~@angular/material/prebuilt-themes/deeppurple-amber.css";
+
+body {
+  background-color: #fafafa;
+  margin: 20px;
+}
+
+.mat-form-field {
+  font-size: 14px;
+  width: 100%;
+}
+
+table{
+  width: 100%;
+}
+
+.mat-radio-group {
+  display: inline-flex;
+  flex-direction: row;
+}
+
+.mat-radio-group-error {
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.mat-radio-button {
+  margin: 5px;
+}
+
+.mat-dialog-content {
+  overflow-y: hidden !important;
+}

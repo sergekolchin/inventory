@@ -1,0 +1,34 @@
+<form [formGroup]="formGroup" (ngSubmit)="submit(formGroup)" novalidate>
+  <h1 mat-dialog-title>Add product</h1>
+  <div mat-dialog-content>
+    <input matInput formControlName="id" hidden="">
+    <mat-form-field>
+      <input matInput formControlName="name" placeholder="Name">
+      <mat-error>
+        Name is required
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput formControlName="type" placeholder="Type">
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput [matDatepicker]="picker" placeholder="Choose expiry date" formControlName="expiryDate">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-select placeholder="Choose warehouse" formControlName="warehouseId">
+        <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse.id">
+          {{warehouse.name}}
+        </mat-option>
+      </mat-select>
+      <mat-error>
+        WarehouseId is required
+      </mat-error>
+    </mat-form-field>
+  </div>
+  <div mat-dialog-actions align="center">
+    <button mat-raised-button [mat-dialog-close]="undefined" (click)="onCancelClick()">Cancel</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="formGroup.invalid">Save</button>
+  </div>
+</form>
