@@ -7,7 +7,8 @@ import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { AppComponent } from "./app.component";
 import { HomeComponent, AddProductDialog as AddEmployeeDialog } from "./home/home.component";
 import { MatFormFieldModule, MatInputModule, MatRadioModule, MatSelectModule, MatButtonModule, MatCheckboxModule, MatDatepickerModule, MatIconModule,
-  MatTableModule, MatPaginatorModule, MatProgressSpinnerModule, MatSortModule, MatGridListModule, MatDialogModule, MatNativeDateModule, MatListModule, MAT_DATE_LOCALE, MAT_DATE_FORMATS, DateAdapter
+  MatTableModule, MatPaginatorModule, MatProgressSpinnerModule, MatSortModule, MatGridListModule, MatDialogModule, MatNativeDateModule, MatListModule,
+  MatTooltipModule, MAT_DATE_LOCALE, MAT_DATE_FORMATS, DateAdapter
 } from "@angular/material";
 import { MomentUtcDateAdapter } from "./adapters/momentUtcDate.adapter";
 import { MAT_MOMENT_DATE_FORMATS } from "@angular/material-moment-adapter";
@@ -26,6 +27,7 @@ import { MAT_MOMENT_DATE_FORMATS } from "@angular/material-moment-adapter";
     BrowserAnimationsModule,
     MatFormFieldModule, MatInputModule, MatRadioModule, MatSelectModule, MatButtonModule, MatCheckboxModule, MatDatepickerModule, MatIconModule,
     MatTableModule, MatPaginatorModule, MatProgressSpinnerModule, MatSortModule, MatGridListModule, MatDialogModule, MatNativeDateModule, MatListModule,
+    MatTooltipModule,
     RouterModule.forRoot([
       { path: "", component: HomeComponent, pathMatch: "full" },
       { path: "**", redirectTo: "/" }

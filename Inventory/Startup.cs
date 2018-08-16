@@ -70,7 +70,7 @@ namespace Inventory
             });
 
             // Start Quartz job
-            app.StartJob<ExpiredNotifyJob>(TimeSpan.FromSeconds(60));
+            app.StartJob<ExpiredNotifyJob>(TimeSpan.FromHours(24));
 
             app.UseSpa(spa =>
             {

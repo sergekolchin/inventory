@@ -10,7 +10,7 @@ import { Warehouse } from "../models/warehouse";
   templateUrl: "./home.component.html"
 })
 export class HomeComponent implements OnInit {
-  displayedColumns: string[] = ["id", "name", "type", "expiryDate", "warehouse"];
+  displayedColumns: string[] = ["id", "name", "type", "expiryDate", "warehouse", "actionsColumn"];
 
   dataSource: MatTableDataSource<Product>;
   products: Product[];
@@ -49,12 +49,23 @@ export class HomeComponent implements OnInit {
       if (result) {
         this.dataService.addProduct(result).subscribe(product => {
           this.products.push(product);
-          //refresh table
-          this.dataSource.data = this.products;
+          this.refreshTable();
         },
           error => console.log("addProduct() error", error));
       }
     });
+  }
+
+  delete(id): void {
+    this.dataService.deleteProduct(id).subscribe(product => {
+      let index = this.products.findIndex(x => x.id === id);
+      this.products.splice(index, 1);
+      this.refreshTable();
+    });
+  }
+
+  refreshTable(): void {
+    this.dataSource.data = this.products;
   }
 }
 

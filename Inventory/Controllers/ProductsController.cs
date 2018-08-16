@@ -117,9 +117,10 @@ namespace Inventory.Controllers
 
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
-            
+
             // Notify about the sale
-            await _notifyService.ProductSold(product);
+            // No waiting for completion
+            _notifyService.ProductSold(product);
 
             return Ok(product);
         }
