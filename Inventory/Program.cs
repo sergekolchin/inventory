@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace Inventory
 {
@@ -19,6 +13,10 @@ namespace Inventory
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((bilderContext, config) =>
+                    {
+                        config.AddJsonFile("secrets.json", optional: true, reloadOnChange: true);
+                    })
                 .UseStartup<Startup>();
     }
 }

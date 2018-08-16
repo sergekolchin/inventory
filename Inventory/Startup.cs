@@ -1,3 +1,5 @@
+using System;
+using Inventory.Configuraion;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Inventory.Data;
+using Inventory.Services;
+using Inventory.Quartz;
 
 namespace Inventory
 {
@@ -21,6 +25,8 @@ namespace Inventory
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<SmtpConfig>(Configuration.GetSection("Smtp"));
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
@@ -32,6 +38,11 @@ namespace Inventory
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddSingleton<INotifyService, EmailNotifyService>();
+            
+            // Register Quartz types and jobs
+            services.UseQuartz(typeof(ExpiredNotifyJob));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,6 +69,9 @@ namespace Inventory
                     template: "{controller}/{action=Index}/{id?}");
             });
 
+            // Start Quartz job
+            app.StartJob<ExpiredNotifyJob>(TimeSpan.FromSeconds(60));
+
             app.UseSpa(spa =>
             {
                 // To learn more about options for serving an Angular SPA from ASP.NET Core,
@@ -74,7 +88,7 @@ namespace Inventory
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
                 var context = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                
+
                 //Delete Database for testing purposes
                 //context.Database.EnsureDeleted();
 

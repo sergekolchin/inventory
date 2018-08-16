@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Inventory.Data;
 using Inventory.Models;
+using Inventory.Services;
 
 namespace Inventory.Controllers
 {
@@ -15,10 +16,12 @@ namespace Inventory.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly INotifyService _notifyService;
 
-        public ProductsController(ApplicationDbContext context)
+        public ProductsController(ApplicationDbContext context, INotifyService notifyService)
         {
             _context = context;
+            _notifyService = notifyService;
         }
 
         // GET: api/Products
@@ -114,6 +117,9 @@ namespace Inventory.Controllers
 
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
+            
+            // Notify about the sale
+            await _notifyService.ProductSold(product);
 
             return Ok(product);
         }
