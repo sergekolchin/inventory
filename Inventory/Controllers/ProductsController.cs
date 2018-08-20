@@ -26,9 +26,9 @@ namespace Inventory.Controllers
 
         // GET: api/Products
         [HttpGet]
-        public IEnumerable<Product> GetProducts()
+        public async Task<IEnumerable<Product>> GetProducts()
         {
-            return _context.Products.Include(x => x.Warehouse);
+            return await _context.Products.Include(x => x.Warehouse).ToListAsync();
         }
 
         // GET: api/Products/5
@@ -120,7 +120,7 @@ namespace Inventory.Controllers
 
             // Notify about the sale
             // No waiting for completion
-            _notifyService.ProductSold(product);
+            _notifyService?.ProductSold(product);
 
             return Ok(product);
         }

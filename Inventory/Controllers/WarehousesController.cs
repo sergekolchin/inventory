@@ -23,9 +23,9 @@ namespace Inventory.Controllers
 
         // GET: api/Warehouses
         [HttpGet]
-        public IEnumerable<Warehouse> GetWarehouses()
+        public async Task<IEnumerable<Warehouse>> GetWarehouses()
         {
-            return _context.Warehouses;
+            return await _context.Warehouses.ToListAsync();
         }
 
         // GET: api/Warehouses/5
