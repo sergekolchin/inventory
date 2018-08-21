@@ -23,9 +23,8 @@ export class DataService {
     return this.http.post<Product>(this.productsUrl, product);
   }
 
-  updateProduct(product: Product): Observable<void> {
-    const urlParams = new HttpParams().set("id", product.id.toString());
-    return this.http.put<void>(this.productsUrl, product, { params: urlParams });
+  updateProduct(product: Product): Observable<Product> {
+    return this.http.put<Product>(this.productsUrl + "/" + product.id, product);
   }
 
   deleteProduct(id: number): Observable<Product> {

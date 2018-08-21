@@ -79,7 +79,7 @@ namespace Inventory.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok(warehouse);
         }
 
         // POST: api/Warehouses

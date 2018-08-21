@@ -101,10 +101,9 @@ namespace Inventory.Tests
             var result = await _controller.PutProduct(1, product);
 
             // Assert
-            var okNoContentResult = result.Should().BeOfType<NoContentResult>().Subject;
-
-            var updatedProduct = _dbContext.Products.FindAsync(1);
-            updatedProduct.Result.Name.Should().Be("Updated");
+            var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+            var updatedProduct = okResult.Value.Should().BeAssignableTo<Product>().Subject;
+            updatedProduct.Name.Should().Be("Updated");
         }
 
         [Fact]

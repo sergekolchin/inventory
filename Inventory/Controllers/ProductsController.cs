@@ -82,7 +82,7 @@ namespace Inventory.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok(await _context.Products.Include(x => x.Warehouse).FirstOrDefaultAsync(x => x.Id == product.Id));
         }
 
         // POST: api/Products

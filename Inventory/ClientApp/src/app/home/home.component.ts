@@ -39,19 +39,34 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  openDialog(): void {
+  openDialog(row: Product): void {
     const dialogRef = this.dialog.open(AddProductDialog, {
       width: "450px",
-      data: {}
+      data: !row ? {} : row 
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.dataService.addProduct(result).subscribe(product => {
-          this.products.push(product);
-          this.refreshTable();
-        },
-          error => console.log("addProduct() error", error));
+      if (result as Product) {
+        if (result.id === 0) {
+          // add new product
+          this.dataService.addProduct(result).subscribe(product => {
+            this.products.push(product);
+            this.refreshTable();
+          },
+            error => {
+              console.log("addProduct() error", error);
+            });
+        } else {
+          // update existing product
+          this.dataService.updateProduct(result).subscribe(product => {
+            let index = this.products.findIndex(x => x.id === result.id);
+            this.products[index] = product;
+            this.refreshTable();
+          },
+            error => {
+              console.log("updateProduct() error", error);
+            });
+        }
       }
     });
   }
@@ -61,7 +76,13 @@ export class HomeComponent implements OnInit {
       let index = this.products.findIndex(x => x.id === id);
       this.products.splice(index, 1);
       this.refreshTable();
+    }, error => {
+      console.log("deleteProduct()", error);
     });
+  }
+
+  edit(row: Product): void {
+    this.openDialog(row);
   }
 
   refreshTable(): void {
@@ -81,10 +102,10 @@ export class AddProductDialog implements OnInit {
     private readonly dataService: DataService) {
     this.formGroup = fb.group({
       id: fb.control(!data.id ? 0 : data.id),
-      name: fb.control("", [Validators.required]),
-      type: fb.control(""),
-      expiryDate: fb.control(""),
-      warehouseId: fb.control("", [Validators.required])
+      name: fb.control(data.name, [Validators.required]),
+      type: fb.control(data.type),
+      expiryDate: fb.control(data.expiryDate),
+      warehouseId: fb.control(!data.warehouseId ? 1 : data.warehouseId, [Validators.required]) //set default value for select
     });
   }
 

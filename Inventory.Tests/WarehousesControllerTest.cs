@@ -94,10 +94,9 @@ namespace Inventory.Tests
             var result = await _controller.PutWarehouse(1, warehouse);
 
             // Assert
-            var okNoContentResult = result.Should().BeOfType<NoContentResult>().Subject;
-
-            var updatedWarehouse = _dbContext.Warehouses.FindAsync(1);
-            updatedWarehouse.Result.Name.Should().Be("Updated");
+            var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+            var updatedWarehouse = okResult.Value.Should().BeAssignableTo<Warehouse>().Subject;
+            updatedWarehouse.Name.Should().Be("Updated");
         }
 
         [Fact]
