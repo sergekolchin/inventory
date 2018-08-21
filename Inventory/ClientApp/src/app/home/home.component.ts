@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, Inject } from "@angular/core";
 import { MatPaginator, MatSort, MatTableDataSource, MatDialog, MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { DataService } from "../services/dataService";
+import { DataService } from "../services/data.service";
 import { Product } from "../models/product";
 import { Warehouse } from "../models/warehouse";
 
@@ -97,9 +97,13 @@ export class HomeComponent implements OnInit {
 export class AddProductDialog implements OnInit {
   formGroup: FormGroup;
   warehouses: Warehouse[];
+  title: string;
 
   constructor(public dialogRef: MatDialogRef<AddProductDialog>, @Inject(MAT_DIALOG_DATA) public data: Product, fb: FormBuilder,
     private readonly dataService: DataService) {
+
+    this.title = !data.id ? "Add product" : "Edit product";
+
     this.formGroup = fb.group({
       id: fb.control(!data.id ? 0 : data.id),
       name: fb.control(data.name, [Validators.required]),

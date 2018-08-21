@@ -1,5 +1,5 @@
 <form [formGroup]="formGroup" (ngSubmit)="submit(formGroup)" novalidate>
-  <h1 mat-dialog-title>Add product</h1>
+  <h1 mat-dialog-title>{{title}}</h1>
   <div mat-dialog-content>
     <input formControlName="id" hidden="">
     <mat-form-field>

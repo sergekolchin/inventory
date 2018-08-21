@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, Inject } from "@angular/core";
 import { Warehouse } from "../models/warehouse";
 import { Product } from "../models/product";
 import { HttpClient, HttpParams } from "@angular/common/http";
@@ -6,10 +6,14 @@ import { Observable } from "rxjs/Rx";
 
 @Injectable({ providedIn: "root" })
 export class DataService {
-  readonly productsUrl = "api/products";
-  readonly warehousestUrl = "api/warehouses";
+  baseUrl = "http://localhost:8486/";
+  productsUrl: string;
+  warehousestUrl: string;
 
-  constructor(private readonly http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {
+    this.productsUrl = this.baseUrl + "api/products";
+    this.warehousestUrl = this.baseUrl + "api/warehouses";
+  }
 
   getProducts(): Observable<Product[]> {
     return this.http.get<Product[]>(this.productsUrl);
