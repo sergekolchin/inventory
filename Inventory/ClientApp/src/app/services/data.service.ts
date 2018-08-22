@@ -3,16 +3,16 @@ import { Warehouse } from "../models/warehouse";
 import { Product } from "../models/product";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable } from "rxjs/Rx";
+import { APP_BASE_HREF } from "@angular/common";
 
 @Injectable({ providedIn: "root" })
 export class DataService {
-  baseUrl = "http://localhost:8486/";
   productsUrl: string;
-  warehousestUrl: string;
+  warehousesUrl: string;
 
-  constructor(private readonly http: HttpClient) {
-    this.productsUrl = this.baseUrl + "api/products";
-    this.warehousestUrl = this.baseUrl + "api/warehouses";
+  constructor(private readonly http: HttpClient, @Inject(APP_BASE_HREF) private baseHref: string) {
+    this.productsUrl = this.baseHref + "api/products";
+    this.warehousesUrl = this.baseHref + "api/warehouses";
   }
 
   getProducts(): Observable<Product[]> {
@@ -36,6 +36,6 @@ export class DataService {
   }
 
   getWarhouses(): Observable<Warehouse[]> {
-    return this.http.get<Warehouse[]>(this.warehousestUrl);
+    return this.http.get<Warehouse[]>(this.warehousesUrl);
   }
 }
