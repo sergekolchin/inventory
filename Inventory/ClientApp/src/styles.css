@@ -6,12 +6,16 @@ body {
   margin: 20px;
 }
 
+html {
+  font-family: sans-serif;
+}
+
 .mat-form-field {
   font-size: 14px;
   width: 100%;
 }
 
-table{
+table {
   width: 100%;
 }
 
