@@ -6,7 +6,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Inventory.Data;
+using Inventory.Helpers;
 using Inventory.Models;
+using Microsoft.AspNetCore.Identity.UI.Pages.Internal.Account;
+using Microsoft.Extensions.Logging;
 
 namespace Inventory.Controllers
 {
@@ -15,16 +18,19 @@ namespace Inventory.Controllers
     public class WarehousesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<WarehousesController> _logger;
 
-        public WarehousesController(ApplicationDbContext context)
+        public WarehousesController(ApplicationDbContext context, ILogger<WarehousesController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: api/Warehouses
         [HttpGet]
         public async Task<IEnumerable<Warehouse>> GetWarehouses()
         {
+            _logger.LogInformation("GetWarehouses()");
             return await _context.Warehouses.ToListAsync();
         }
 
@@ -32,8 +38,11 @@ namespace Inventory.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetWarehouse([FromRoute] int id)
         {
+            _logger.LogInformation($"GetWarehouses({id})");
+
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning($"GetWarehouses({id}) invalid ModelState: {ModelState.ErrorsToString()}");
                 return BadRequest(ModelState);
             }
 
@@ -41,6 +50,7 @@ namespace Inventory.Controllers
 
             if (warehouse == null)
             {
+                _logger.LogWarning($"GetWarehouses({id}) not found");
                 return NotFound();
             }
 
@@ -51,13 +61,17 @@ namespace Inventory.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutWarehouse([FromRoute] int id, [FromBody] Warehouse warehouse)
         {
+            _logger.LogInformation($"PutWarehouse({id})");
+
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning($"PutWarehouse({id}) invalid ModelState: {ModelState.ErrorsToString()}");
                 return BadRequest(ModelState);
             }
 
             if (id != warehouse.Id)
             {
+                _logger.LogWarning($"PutWarehouse({id}) {id} != {warehouse.Id}");
                 return BadRequest();
             }
 
@@ -67,14 +81,16 @@ namespace Inventory.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (!WarehouseExists(id))
                 {
+                    _logger.LogWarning(ex, $"PutWarehouse({id}) not found");
                     return NotFound();
                 }
                 else
                 {
+                    _logger.LogWarning(ex, $"PutWarehouse({id}) DbUpdateConcurrencyException");
                     throw;
                 }
             }
@@ -88,6 +104,7 @@ namespace Inventory.Controllers
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning($"PostWarehouse({warehouse.Id}) invalid ModelState: {ModelState.ErrorsToString()}");
                 return BadRequest(ModelState);
             }
 
@@ -103,12 +120,14 @@ namespace Inventory.Controllers
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning($"DeleteWarehouse({id}) invalid ModelState: {ModelState.ErrorsToString()}");
                 return BadRequest(ModelState);
             }
 
             var warehouse = await _context.Warehouses.FindAsync(id);
             if (warehouse == null)
             {
+                _logger.LogWarning($"DeleteWarehouse({id}) not found");
                 return NotFound();
             }
 

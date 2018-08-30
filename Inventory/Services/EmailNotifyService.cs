@@ -10,6 +10,7 @@ using MailKit.Net.Smtp;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 
@@ -19,11 +20,13 @@ namespace Inventory.Services
     {
         private readonly SmtpConfig _smtpConfig;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<EmailNotifyService> _logger;
 
-        public EmailNotifyService(IConfiguration configuration, IOptions<SmtpConfig> smtpConfig)
+        public EmailNotifyService(IConfiguration configuration, IOptions<SmtpConfig> smtpConfig, ILogger<EmailNotifyService> logger)
         {
             _configuration = configuration;
             _smtpConfig = smtpConfig.Value;
+            _logger = logger;
         }
 
         public async Task Expired()
@@ -74,6 +77,7 @@ namespace Inventory.Services
             }
             catch (Exception ex)
             {
+                _logger.LogWarning(ex, "SendEmailAsync() exception");
                 Console.WriteLine(ex);
             }
         }

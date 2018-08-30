@@ -10,6 +10,7 @@ using Inventory.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -31,7 +32,8 @@ namespace Inventory.Tests
             _dbContext.SaveChanges();
 
             var notifyService = new Mock<INotifyService>();
-            _controller = new ProductsController(_dbContext, notifyService.Object);
+            var log = new Mock<ILogger<ProductsController>>();
+            _controller = new ProductsController(_dbContext, notifyService.Object, log.Object);
         }
 
         [Fact]

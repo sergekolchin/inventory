@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Inventory.Data;
+using Inventory.Helpers;
 using Inventory.Models;
 using Inventory.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Inventory.Controllers
 {
@@ -17,17 +19,20 @@ namespace Inventory.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly INotifyService _notifyService;
+        private readonly ILogger<ProductsController> _logger;
 
-        public ProductsController(ApplicationDbContext context, INotifyService notifyService)
+        public ProductsController(ApplicationDbContext context, INotifyService notifyService, ILogger<ProductsController> logger)
         {
             _context = context;
             _notifyService = notifyService;
+            _logger = logger;
         }
 
         // GET: api/Products
         [HttpGet]
         public async Task<IEnumerable<Product>> GetProducts()
         {
+            _logger.LogInformation("GetProducts()");
             return await _context.Products.Include(x => x.Warehouse).ToListAsync();
         }
 
@@ -35,8 +40,11 @@ namespace Inventory.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProduct([FromRoute] int id)
         {
+            _logger.LogInformation($"GetProduct({id})");
+
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning($"GetProduct({id}) invalid ModelState: {ModelState.ErrorsToString()}");
                 return BadRequest(ModelState);
             }
 
@@ -44,6 +52,7 @@ namespace Inventory.Controllers
 
             if (product == null)
             {
+                _logger.LogWarning($"GetProduct({id}) not found");
                 return NotFound();
             }
 
@@ -54,14 +63,24 @@ namespace Inventory.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduct([FromRoute] int id, [FromBody] Product product)
         {
+            _logger.LogInformation($"PutProduct({id})");
+
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning($"PutProduct({id}) invalid ModelState: {ModelState.ErrorsToString()}");
                 return BadRequest(ModelState);
             }
 
             if (id != product.Id)
             {
+                _logger.LogWarning($"PutProduct({id}) {id} != {product.Id}");
                 return BadRequest();
+            }
+
+            var warehouse = _context.Warehouses.FindAsync(product.WarehouseId);
+            if (warehouse == null)
+            {
+                _logger.LogWarning($"PutProduct({id}) Warehouse with Id: {product.WarehouseId} not found");
             }
 
             _context.Entry(product).State = EntityState.Modified;
@@ -70,14 +89,16 @@ namespace Inventory.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (!ProductExists(id))
                 {
+                    _logger.LogWarning(ex, $"PutProduct({id}) not found");
                     return NotFound();
                 }
                 else
                 {
+                    _logger.LogWarning(ex, $"PutProduct({id}) DbUpdateConcurrencyException");
                     throw;
                 }
             }
@@ -89,8 +110,11 @@ namespace Inventory.Controllers
         [HttpPost]
         public async Task<IActionResult> PostProduct([FromBody] Product product)
         {
+            _logger.LogInformation($"PostProduct({product.Name})");
+
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning($"PostProduct() invalid ModelState: {ModelState.ErrorsToString()}");
                 return BadRequest(ModelState);
             }
 
@@ -104,14 +128,18 @@ namespace Inventory.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct([FromRoute] int id)
         {
+            _logger.LogInformation($"DeleteProduct({id})");
+
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning($"DeleteProduct({id}) invalid ModelState: {ModelState.ErrorsToString()}");
                 return BadRequest(ModelState);
             }
 
             var product = await _context.Products.FindAsync(id);
             if (product == null)
             {
+                _logger.LogWarning($"DeleteProduct({id}) not found");
                 return NotFound();
             }
 

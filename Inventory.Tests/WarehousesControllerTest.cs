@@ -9,6 +9,8 @@ using Inventory.Data;
 using Inventory.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 
 namespace Inventory.Tests
@@ -27,7 +29,8 @@ namespace Inventory.Tests
             _dbContext.Warehouses.Add(new Warehouse { Id = 2, Name = "Second" });
             _dbContext.SaveChanges();
 
-            _controller = new WarehousesController(_dbContext);
+            var log = new Mock<ILogger<WarehousesController>>();
+            _controller = new WarehousesController(_dbContext, log.Object);
         }
 
         [Fact]
