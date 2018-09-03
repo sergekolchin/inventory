@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace Inventory.Models
 {
-    public class Warehouse : BaseEntity
+    public class BaseEntity
     {
-        [Required]
-        public string Name { get; set; }
+        [Key]
+        public int Id { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public DateTime LastModifiedOn { get; set; }
 
-        public virtual ICollection<Product> Products { get; set; }
     }
 }

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Inventory.Data;
 using Inventory.Helpers;
 using Inventory.Models;
-using Microsoft.AspNetCore.Identity.UI.Pages.Internal.Account;
+using Inventory.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Inventory.Controllers
@@ -17,12 +13,12 @@ namespace Inventory.Controllers
     [ApiController]
     public class WarehousesController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IWarehouseService _warhouseService;
         private readonly ILogger<WarehousesController> _logger;
 
-        public WarehousesController(ApplicationDbContext context, ILogger<WarehousesController> logger)
+        public WarehousesController(IWarehouseService warhouseService, ILogger<WarehousesController> logger)
         {
-            _context = context;
+            _warhouseService = warhouseService;
             _logger = logger;
         }
 
@@ -31,7 +27,7 @@ namespace Inventory.Controllers
         public async Task<IEnumerable<Warehouse>> GetWarehouses()
         {
             _logger.LogInformation("GetWarehouses()");
-            return await _context.Warehouses.ToListAsync();
+            return await _warhouseService.GetAllAsync();
         }
 
         // GET: api/Warehouses/5
@@ -46,7 +42,7 @@ namespace Inventory.Controllers
                 return BadRequest(ModelState);
             }
 
-            var warehouse = await _context.Warehouses.FindAsync(id);
+            var warehouse = await _warhouseService.GetByIdAsync(id);
 
             if (warehouse == null)
             {
@@ -75,24 +71,14 @@ namespace Inventory.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(warehouse).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _warhouseService.UpdateAsync(warehouse);
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                if (!WarehouseExists(id))
-                {
-                    _logger.LogWarning(ex, $"PutWarehouse({id}) not found");
-                    return NotFound();
-                }
-                else
-                {
-                    _logger.LogWarning(ex, $"PutWarehouse({id}) DbUpdateConcurrencyException");
-                    throw;
-                }
+                _logger.LogWarning(ex, $"PutWarehouse({id}) DbUpdateConcurrencyException");
+                throw;
             }
 
             return Ok(warehouse);
@@ -108,8 +94,7 @@ namespace Inventory.Controllers
                 return BadRequest(ModelState);
             }
 
-            _context.Warehouses.Add(warehouse);
-            await _context.SaveChangesAsync();
+            await _warhouseService.AddAsync(warehouse);
 
             return CreatedAtAction("GetWarehouse", new { id = warehouse.Id }, warehouse);
         }
@@ -124,22 +109,8 @@ namespace Inventory.Controllers
                 return BadRequest(ModelState);
             }
 
-            var warehouse = await _context.Warehouses.FindAsync(id);
-            if (warehouse == null)
-            {
-                _logger.LogWarning($"DeleteWarehouse({id}) not found");
-                return NotFound();
-            }
-
-            _context.Warehouses.Remove(warehouse);
-            await _context.SaveChangesAsync();
-
+            var warehouse = await _warhouseService.DeleteAsync(id);
             return Ok(warehouse);
-        }
-
-        private bool WarehouseExists(int id)
-        {
-            return _context.Warehouses.Any(e => e.Id == id);
         }
     }
 }

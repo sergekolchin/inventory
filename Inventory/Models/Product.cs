@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace Inventory.Models
 {
-    public class Product
+    public class Product : BaseEntity
     {
-        [Key]
-        public int Id { get; set; }
         [Required]
         public string Name { get; set; }
         public string Type { get; set; }

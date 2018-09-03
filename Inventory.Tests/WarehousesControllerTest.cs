@@ -7,6 +7,7 @@ using FluentAssertions;
 using Inventory.Controllers;
 using Inventory.Data;
 using Inventory.Models;
+using Inventory.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -30,7 +31,11 @@ namespace Inventory.Tests
             _dbContext.SaveChanges();
 
             var log = new Mock<ILogger<WarehousesController>>();
-            _controller = new WarehousesController(_dbContext, log.Object);
+            var repositoryLog = new Mock<ILogger<IRepository<Warehouse>>>();
+
+            var repository = new Repository<Warehouse>(_dbContext, repositoryLog.Object);
+            var service = new WarehouseService(repository);
+            _controller = new WarehousesController(service, log.Object);
         }
 
         [Fact]

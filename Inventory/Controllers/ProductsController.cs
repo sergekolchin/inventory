@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Inventory.Data;
 using Inventory.Helpers;
 using Inventory.Models;
 using Inventory.Services;
@@ -17,13 +13,16 @@ namespace Inventory.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IProductService _productService;
+        private readonly IWarehouseService _warehouseService;
         private readonly INotifyService _notifyService;
         private readonly ILogger<ProductsController> _logger;
 
-        public ProductsController(ApplicationDbContext context, INotifyService notifyService, ILogger<ProductsController> logger)
+        public ProductsController(IProductService productService, IWarehouseService warehouseService,
+            INotifyService notifyService, ILogger<ProductsController> logger)
         {
-            _context = context;
+            _productService = productService;
+            _warehouseService = warehouseService;
             _notifyService = notifyService;
             _logger = logger;
         }
@@ -33,7 +32,7 @@ namespace Inventory.Controllers
         public async Task<IEnumerable<Product>> GetProducts()
         {
             _logger.LogInformation("GetProducts()");
-            return await _context.Products.Include(x => x.Warehouse).ToListAsync();
+            return await _productService.GetAllAsync();
         }
 
         // GET: api/Products/5
@@ -48,7 +47,7 @@ namespace Inventory.Controllers
                 return BadRequest(ModelState);
             }
 
-            var product = await _context.Products.Include(x => x.Warehouse).FirstOrDefaultAsync(x => x.Id == id);
+            var product = await _productService.GetByIdWithWarehouseAsync(id);
 
             if (product == null)
             {
@@ -77,33 +76,23 @@ namespace Inventory.Controllers
                 return BadRequest();
             }
 
-            var warehouse = _context.Warehouses.FindAsync(product.WarehouseId);
+            var warehouse = _warehouseService.GetByIdAsync(product.WarehouseId);
             if (warehouse == null)
             {
                 _logger.LogWarning($"PutProduct({id}) Warehouse with Id: {product.WarehouseId} not found");
             }
 
-            _context.Entry(product).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _productService.UpdateAsync(product);
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                if (!ProductExists(id))
-                {
-                    _logger.LogWarning(ex, $"PutProduct({id}) not found");
-                    return NotFound();
-                }
-                else
-                {
-                    _logger.LogWarning(ex, $"PutProduct({id}) DbUpdateConcurrencyException");
-                    throw;
-                }
+                _logger.LogWarning(ex, $"PutProduct({id}) DbUpdateConcurrencyException");
+                throw;
             }
 
-            return Ok(await _context.Products.Include(x => x.Warehouse).FirstOrDefaultAsync(x => x.Id == product.Id));
+            return Ok(await _productService.GetByIdWithWarehouseAsync(product.Id));
         }
 
         // POST: api/Products
@@ -118,10 +107,9 @@ namespace Inventory.Controllers
                 return BadRequest(ModelState);
             }
 
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
+            await _productService.AddAsync(product);
 
-            return Ok(await _context.Products.Include(x => x.Warehouse).FirstOrDefaultAsync(x => x.Id == product.Id));
+            return Ok(await _productService.GetByIdWithWarehouseAsync(product.Id));
         }
 
         // DELETE: api/Products/5
@@ -136,26 +124,20 @@ namespace Inventory.Controllers
                 return BadRequest(ModelState);
             }
 
-            var product = await _context.Products.FindAsync(id);
+            var product = await _productService.GetByIdAsync(id);
             if (product == null)
             {
                 _logger.LogWarning($"DeleteProduct({id}) not found");
                 return NotFound();
             }
 
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
+            await _productService.DeleteAsync(id);
 
             // Notify about the sale
             // No waiting for completion
             _notifyService?.ProductSold(product);
 
             return Ok(product);
-        }
-
-        private bool ProductExists(int id)
-        {
-            return _context.Products.Any(e => e.Id == id);
         }
     }
 }

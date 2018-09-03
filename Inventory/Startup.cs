@@ -40,6 +40,10 @@ namespace Inventory
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            services.AddScoped<IWarehouseService, WarehouseService>();
+            services.AddScoped<IProductService, ProductService>();
+
             services.AddSingleton<INotifyService, EmailNotifyService>();
             
             // Register Quartz types and jobs

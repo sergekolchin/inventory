@@ -19,6 +19,8 @@ namespace Inventory.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Warehouse>().HasData(new Warehouse { Id = 1, Name = "Main" });
+            modelBuilder.Entity<Warehouse>().Property(x => x.CreatedOn).HasDefaultValue(DateTime.UtcNow);
+            modelBuilder.Entity<Warehouse>().Property(x => x.LastModifiedOn).HasDefaultValue(DateTime.UtcNow);
 
             modelBuilder.Entity<Product>().HasData(
                 new Product { Id = 1, Name = "Apple", Type = "Food", WarehouseId = 1, ExpiryDate = DateTime.UtcNow.AddDays(1) },
@@ -26,6 +28,9 @@ namespace Inventory.Data
                 new Product { Id = 3, Name = "Milk", Type = "Food", WarehouseId = 1, ExpiryDate = DateTime.UtcNow },
                 new Product { Id = 4, Name = "Meat", Type = "Food", WarehouseId = 1, ExpiryDate = DateTime.UtcNow },
                 new Product { Id = 5, Name = "Bread", Type = "Food", WarehouseId = 1, ExpiryDate = DateTime.UtcNow });
+
+            modelBuilder.Entity<Product>().Property(x => x.CreatedOn).HasDefaultValue(DateTime.UtcNow);
+            modelBuilder.Entity<Product>().Property(x => x.LastModifiedOn).HasDefaultValue(DateTime.UtcNow);
         }
     }
 }

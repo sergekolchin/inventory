@@ -32,8 +32,18 @@ namespace Inventory.Tests
             _dbContext.SaveChanges();
 
             var notifyService = new Mock<INotifyService>();
-            var log = new Mock<ILogger<ProductsController>>();
-            _controller = new ProductsController(_dbContext, notifyService.Object, log.Object);
+
+            var warehouseRepositoryLog = new Mock<ILogger<IRepository<Warehouse>>>();
+            var warehouseRepository = new Repository<Warehouse>(_dbContext, warehouseRepositoryLog.Object);
+            var warehouseService = new WarehouseService(warehouseRepository);
+
+            var productRepositoryLog = new Mock<ILogger<IRepository<Product>>>();
+            var productRepository = new Repository<Product>(_dbContext, productRepositoryLog.Object);
+            var productService = new ProductService(productRepository);
+
+            var productsControllerLog = new Mock<ILogger<ProductsController>>();
+
+            _controller = new ProductsController(productService, warehouseService, notifyService.Object, productsControllerLog.Object);
         }
 
         [Fact]
@@ -67,6 +77,7 @@ namespace Inventory.Tests
             var product = okResult.Value.Should().BeAssignableTo<Product>().Subject;
             product.Id.Should().Be(1);
             product.Name.Should().Be("Apple");
+            product.Warehouse.Name.Should().Be("Main");
         }
 
         [Fact]
